@@ -48,213 +48,249 @@ pub fn parse<'def, 'r>(
     ))
 }
 
-//#[cfg(test)]
-//mod tests {
-//    use test_common::{generate_tokens, span};
-//
-//    use super::parse;
-//    use parse::tree::{
-//        Annotation, AnnotationBody, Class, ClassBody, CompilationUnit, CompilationUnitItem, Enum,
-//        Import, ImportPrefix, Interface, Package,
-//    };
-//    use parse::Tokens;
-//    use std::cell::RefCell;
-//
-//    #[test]
-//    fn parse_class_with_package() {
-//        assert_eq!(
-//            parse(&generate_tokens(
-//                r#"
-// /* This file
-// */
-//package dev.lilit;
-//
-//// Class Test is for something
-//class Test {}
-//interface Test2 {}
-//enum Test3 {}
-//@interface Test4 {}
-//        "#
-//            )),
-//            Ok((
-//                &[] as Tokens,
-//                CompilationUnit {
-//                    package_opt: Some(Package {
-//                        prefix_opt: Some(Box::new(Package {
-//                            prefix_opt: None,
-//                            annotateds: vec![],
-//                            name: span(3, 9, "dev"),
-//                            def_opt: None
-//                        })),
-//                        annotateds: vec![],
-//                        name: span(3, 13, "lilit"),
-//                        def_opt: None
-//                    }),
-//                    imports: vec![],
-//                    items: vec![
-//                        CompilationUnitItem::Class(Class {
-//                            modifiers: vec![],
-//                            name: span(6, 7, "Test"),
-//                            type_params: vec![],
-//                            extend_opt: None,
-//                            implements: vec![],
-//                            body: ClassBody { items: vec![] },
-//                            def_opt: RefCell::new(None)
-//                        }),
-//                        CompilationUnitItem::Interface(Interface {
-//                            modifiers: vec![],
-//                            name: span(7, 11, "Test2"),
-//                            type_params: vec![],
-//                            extends: vec![],
-//                            body: ClassBody { items: vec![] }
-//                        }),
-//                        CompilationUnitItem::Enum(Enum {
-//                            modifiers: vec![],
-//                            name: span(8, 6, "Test3"),
-//                            implements: vec![],
-//                            constants: vec![],
-//                            body_opt: None
-//                        }),
-//                        CompilationUnitItem::Annotation(Annotation {
-//                            modifiers: vec![],
-//                            name: span(9, 12, "Test4"),
-//                            body: AnnotationBody { items: vec![] }
-//                        }),
-//                    ]
-//                }
-//            ))
-//        );
-//    }
-//
-//    #[test]
-//    fn parse_class_without_package() {
-//        assert_eq!(
-//            parse(&generate_tokens(
-//                r#"
-//           class Test {}
-//           "#
-//            )),
-//            Ok((
-//                &[] as Tokens,
-//                CompilationUnit {
-//                    package_opt: None,
-//                    imports: vec![],
-//                    items: vec![CompilationUnitItem::Class(Class {
-//                        modifiers: vec![],
-//                        name: span(1, 7, "Test"),
-//                        type_params: vec![],
-//                        extend_opt: None,
-//                        implements: vec![],
-//                        body: ClassBody { items: vec![] },
-//                        def_opt: RefCell::new(None)
-//                    })]
-//                }
-//            ))
-//        );
-//    }
-//
-//    #[test]
-//    fn parse_class_with_imports() {
-//        assert_eq!(
-//            parse(&generate_tokens(
-//                r#"
-//package dev.lilit;
-//
-//import dev.test.*;
-//import dev.test;
-//import dev.test.Test;
-//import dev.test.Test.*;
-//
-//class Test {}
-//           "#
-//            )),
-//            Ok((
-//                &[] as Tokens,
-//                CompilationUnit {
-//                    package_opt: Some(Package {
-//                        prefix_opt: Some(Box::new(Package {
-//                            prefix_opt: None,
-//                            annotateds: vec![],
-//                            name: span(1, 9, "dev"),
-//                            def_opt: None
-//                        })),
-//                        annotateds: vec![],
-//                        name: span(1, 13, "lilit"),
-//                        def_opt: None
-//                    }),
-//                    imports: vec![
-//                        Import {
-//                            prefix_opt: Some(Box::new(ImportPrefix {
-//                                prefix_opt: None,
-//                                name: span(3, 8, "dev"),
-//                                def_opt: RefCell::new(None)
-//                            })),
-//                            is_static: false,
-//                            is_wildcard: true,
-//                            name: span(3, 12, "test"),
-//                            def_opt: RefCell::new(None)
-//                        },
-//                        Import {
-//                            prefix_opt: Some(Box::new(ImportPrefix {
-//                                prefix_opt: None,
-//                                name: span(4, 8, "dev"),
-//                                def_opt: RefCell::new(None)
-//                            })),
-//                            is_static: false,
-//                            is_wildcard: false,
-//                            name: span(4, 12, "test"),
-//                            def_opt: RefCell::new(None)
-//                        },
-//                        Import {
-//                            prefix_opt: Some(Box::new(ImportPrefix {
-//                                prefix_opt: Some(Box::new(ImportPrefix {
-//                                    prefix_opt: None,
-//                                    name: span(5, 8, "dev"),
-//                                    def_opt: RefCell::new(None)
-//                                })),
-//                                name: span(5, 12, "test"),
-//                                def_opt: RefCell::new(None)
-//                            })),
-//                            is_static: false,
-//                            is_wildcard: false,
-//                            name: span(5, 17, "Test"),
-//                            def_opt: RefCell::new(None)
-//                        },
-//                        Import {
-//                            prefix_opt: Some(Box::new(ImportPrefix {
-//                                prefix_opt: Some(Box::new(ImportPrefix {
-//                                    prefix_opt: None,
-//                                    name: span(6, 8, "dev"),
-//                                    def_opt: RefCell::new(None)
-//                                })),
-//                                name: span(6, 12, "test"),
-//                                def_opt: RefCell::new(None)
-//                            })),
-//                            is_static: false,
-//                            is_wildcard: true,
-//                            name: span(6, 17, "Test"),
-//                            def_opt: RefCell::new(None)
-//                        },
-//                    ],
-//                    items: vec![CompilationUnitItem::Class(Class {
-//                        modifiers: vec![],
-//                        name: span(8, 7, "Test"),
-//                        type_params: vec![],
-//                        extend_opt: None,
-//                        implements: vec![],
-//                        body: ClassBody { items: vec![] },
-//                        def_opt: RefCell::new(None)
-//                    })]
-//                }
-//            ))
-//        );
-//    }
-//
-//    #[test]
-//    fn parse_package_info() {
-//        assert_eq!(
-//            parse(&generate_tokens("package dev.lilit;")),
-//            Err(&[] as Tokens,)
-//        )
-//    }
-//}
+#[cfg(test)]
+mod tests {
+    use test_common::{generate_tokens, span};
+    use parse::id_gen::IdGen;
+
+    use super::parse;
+    use parse::tree::{
+        Annotation, AnnotationBody, Class, ClassBody, CompilationUnit, CompilationUnitItem, Enum,
+        Import, ImportPrefix, Interface, Package,
+    };
+    use parse::Tokens;
+    use std::cell::RefCell;
+
+    #[test]
+    fn parse_class_with_package() {
+        let mut id_gen = IdGen {
+            uuid: 1,
+            path: String::from("lalala"),
+            runner: 0,
+        };
+        assert_eq!(
+            parse(&generate_tokens(
+                r#"
+ /* This file
+ */
+package dev.lilit;
+
+// Class Test is for something
+class Test {}
+interface Test2 {}
+enum Test3 {}
+@interface Test4 {}
+class Test5 {}
+        "#
+            ), &mut id_gen),
+            Ok((
+                &[] as Tokens,
+                CompilationUnit {
+                    package_opt: Some(Package {
+                        prefix_opt: Some(Box::new(Package {
+                            prefix_opt: None,
+                            annotateds: vec![],
+                            name: span(3, 9, "dev"),
+                            def_opt: None
+                        })),
+                        annotateds: vec![],
+                        name: span(3, 13, "lilit"),
+                        def_opt: None
+                    }),
+                    imports: vec![],
+                    items: vec![
+                        CompilationUnitItem::Class(Class {
+                            modifiers: vec![],
+                            name: span(6, 7, "Test"),
+                            type_params: vec![],
+                            extend_opt: None,
+                            implements: vec![],
+                            body: ClassBody { items: vec![] },
+                            def_opt: RefCell::new(None),
+                            id : String::from("u1_lalala_class_Test_1")
+                        }),
+                        CompilationUnitItem::Interface(Interface {
+                            modifiers: vec![],
+                            name: span(7, 11, "Test2"),
+                            type_params: vec![],
+                            extends: vec![],
+                            body: ClassBody { items: vec![] }
+                        }),
+                        CompilationUnitItem::Enum(Enum {
+                            modifiers: vec![],
+                            name: span(8, 6, "Test3"),
+                            implements: vec![],
+                            constants: vec![],
+                            body_opt: None
+                        }),
+                        CompilationUnitItem::Annotation(Annotation {
+                            modifiers: vec![],
+                            name: span(9, 12, "Test4"),
+                            body: AnnotationBody { items: vec![] }
+                        }),
+                        CompilationUnitItem::Class(Class {
+                            modifiers: vec![],
+                            name: span(10, 7, "Test5"),
+                            type_params: vec![],
+                            extend_opt: None,
+                            implements: vec![],
+                            body: ClassBody { items: vec![] },
+                            def_opt: RefCell::new(None),
+                            id : String::from("u1_lalala_class_Test5_2")
+                        }),
+                    ]
+                }
+            ))
+        );
+    }
+
+    #[test]
+    fn parse_class_without_package() {
+        let mut id_gen = IdGen {
+            uuid: 1,
+            path: String::from("lalala"),
+            runner: 0,
+        };
+        assert_eq!(
+            parse(&generate_tokens(
+                r#"
+           class Test {}
+           "#
+            ), &mut id_gen),
+            Ok((
+                &[] as Tokens,
+                CompilationUnit {
+                    package_opt: None,
+                    imports: vec![],
+                    items: vec![CompilationUnitItem::Class(Class {
+                        modifiers: vec![],
+                        name: span(1, 7, "Test"),
+                        type_params: vec![],
+                        extend_opt: None,
+                        implements: vec![],
+                        body: ClassBody { items: vec![] },
+                        def_opt: RefCell::new(None),
+                        id: String::from("u1_lalala_class_Test_1")
+                    })]
+                }
+            ))
+        );
+    }
+
+    #[test]
+    fn parse_class_with_imports() {
+        let mut id_gen = IdGen {
+            uuid: 1,
+            path: String::from("lalala"),
+            runner: 0,
+        };
+        assert_eq!(
+            parse(&generate_tokens(
+                r#"
+package dev.lilit;
+
+import dev.test.*;
+import dev.test;
+import dev.test.Test;
+import dev.test.Test.*;
+
+class Test {}
+           "#
+            ), &mut id_gen),
+            Ok((
+                &[] as Tokens,
+                CompilationUnit {
+                    package_opt: Some(Package {
+                        prefix_opt: Some(Box::new(Package {
+                            prefix_opt: None,
+                            annotateds: vec![],
+                            name: span(1, 9, "dev"),
+                            def_opt: None
+                        })),
+                        annotateds: vec![],
+                        name: span(1, 13, "lilit"),
+                        def_opt: None
+                    }),
+                    imports: vec![
+                        Import {
+                            prefix_opt: Some(Box::new(ImportPrefix {
+                                prefix_opt: None,
+                                name: span(3, 8, "dev"),
+                                def_opt: RefCell::new(None)
+                            })),
+                            is_static: false,
+                            is_wildcard: true,
+                            name: span(3, 12, "test"),
+                            def_opt: RefCell::new(None)
+                        },
+                        Import {
+                            prefix_opt: Some(Box::new(ImportPrefix {
+                                prefix_opt: None,
+                                name: span(4, 8, "dev"),
+                                def_opt: RefCell::new(None)
+                            })),
+                            is_static: false,
+                            is_wildcard: false,
+                            name: span(4, 12, "test"),
+                            def_opt: RefCell::new(None)
+                        },
+                        Import {
+                            prefix_opt: Some(Box::new(ImportPrefix {
+                                prefix_opt: Some(Box::new(ImportPrefix {
+                                    prefix_opt: None,
+                                    name: span(5, 8, "dev"),
+                                    def_opt: RefCell::new(None)
+                                })),
+                                name: span(5, 12, "test"),
+                                def_opt: RefCell::new(None)
+                            })),
+                            is_static: false,
+                            is_wildcard: false,
+                            name: span(5, 17, "Test"),
+                            def_opt: RefCell::new(None)
+                        },
+                        Import {
+                            prefix_opt: Some(Box::new(ImportPrefix {
+                                prefix_opt: Some(Box::new(ImportPrefix {
+                                    prefix_opt: None,
+                                    name: span(6, 8, "dev"),
+                                    def_opt: RefCell::new(None)
+                                })),
+                                name: span(6, 12, "test"),
+                                def_opt: RefCell::new(None)
+                            })),
+                            is_static: false,
+                            is_wildcard: true,
+                            name: span(6, 17, "Test"),
+                            def_opt: RefCell::new(None)
+                        },
+                    ],
+                    items: vec![CompilationUnitItem::Class(Class {
+                        modifiers: vec![],
+                        name: span(8, 7, "Test"),
+                        type_params: vec![],
+                        extend_opt: None,
+                        implements: vec![],
+                        body: ClassBody { items: vec![] },
+                        def_opt: RefCell::new(None),
+                        id : String::from("u1_lalala_class_Test_1")
+                    })]
+                }
+            ))
+        );
+    }
+
+    #[test]
+    fn parse_package_info() {
+        let mut id_gen = IdGen {
+            uuid: 1,
+            path: String::from("lalala"),
+            runner: 0,
+        };
+
+        assert_eq!(
+            parse(&generate_tokens("package dev.lilit;"), &mut id_gen),
+            Err(&[] as Tokens,)
+        )
+    }
+}
