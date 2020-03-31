@@ -3,7 +3,6 @@ use std::time::{Duration, Instant};
 use std::{fs, thread};
 
 #[test]
-#[ignore]
 fn benchmark() {
     let content = fs::read_to_string("./tests/fixtures/LocalCache.java").unwrap();
 
