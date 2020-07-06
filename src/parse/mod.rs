@@ -64,6 +64,29 @@ pub fn apply<'def, 'input, 'path>(
         Err(tokens) => return Err(tokens.first().unwrap().span()),
     };
 
+    println!("\n\n\n\n\n {:?}", unit.package_opt);
+
+    println!("\n\n\n\n\n {:?}", unit.imports[0]);
+
+    use parse::tree::ClassBody;
+    use parse::tree::ClassBodyItem;
+    use parse::tree::CompilationUnitItem;
+
+    match &unit.items[0] {
+        CompilationUnitItem::Class(ref a) => {
+            let classes = &a.body;
+            for class in &classes.items {
+                match (class) {
+                    ClassBodyItem::Class(ref b) => println!("\n\n\n\n\n {:?}", b),
+                    _ => {}
+                }
+            }
+        }
+        _ => {
+            println!("{}", "ignored");
+        }
+    }
+
     file.unit = unit;
 
     Ok(file)
