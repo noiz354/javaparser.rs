@@ -57,27 +57,17 @@ use parse::tree::CompilationUnitItem;
 
 fn algo(cu: &CompilationUnit){
         let mut iter = cu.items.iter();
-        
-        // iter.find(|&&x| is_class(&x) );
-
-        // find class item
-        if let result = iter.find(|&x| match x {
+        if let Some(result) = iter.find(|&x| match x {
                 CompilationUnitItem::Class(ref x) => true,
                 _ => return false,
-        }); 
-
-        match result.unwrap() {
-                CompilationUnitItem::Class(ref x)  => {
-                        recu_class(x);
-                        println!("{:?}", x.name.fragment);
-                },
-                _ => {},
+        }){
+                match result {
+                        CompilationUnitItem::Class(ref x)  => {
+                                recu_class(x);
+                        },
+                        _ => {},
+                }
         }
-        
-        // loop pertama kali
-        // for cui in &cu.items {
-
-        // }
 }
 
 use parse::tree::Class;
