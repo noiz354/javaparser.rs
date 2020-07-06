@@ -1,6 +1,10 @@
+#![feature(box_patterns)]
+
 extern crate javaparser;
 extern crate log4rs;
 extern crate log;
+
+
 
 use log::{error, info, warn};
 // use log4rs;
@@ -72,20 +76,134 @@ fn algo(cu: &CompilationUnit){
 
 use parse::tree::Class;
 use parse::tree::ClassBodyItem;
+use parse::tree::Statement;
+use parse::tree::Expr;
 
+// find constructor caller
 // recursively find and print class name 
 fn recu_class(cu: &Class){
-        println!("{:?}", cu.name.fragment);
-        let mut iter = cu.body.items.iter();
-        if let Some(result) = iter.find(|&x| match x {
-                ClassBodyItem::Class(ref x) => true,
-                _ => return false,
-        }){
-                match result {
-                        ClassBodyItem::Class(ref x)  => {
-                                recu_class(x);
+        println!("class inside {:?}", cu.name.fragment);
+
+        for body_item in &cu.body.items {
+                match body_item {
+                        ClassBodyItem::Method(ref y) => {
+                                if y.name.fragment == "setDependencies" {
+                                        println!("method {:?} in class {:?}", y.name.fragment, cu.name.fragment);
+                                        if let Some(x) = &y.block_opt {
+                                                for stmt in &x.stmts{
+                                                        match stmt {
+                                                                Statement::Expr(ref x1) => {
+                                                                        match x1 {
+                                                                                Expr::ConstructorReference(ref x2) => {
+                                                                                        println!("constructor reference {:?}", x2);
+                                                                                },
+                                                                                Expr::Assignment(ref x3) => {
+                                                                                        println!("constructor reference {:?}", x3);
+                                                                                },
+                                                                                _ => {
+                                                                                        println!("other");
+                                                                                },
+                                                                        }
+                                                                },
+                                                                Statement::VariableDeclarators(ref x1) => {
+                                                                        println!("\n\n\n\n\n{:?}", x1.declarators);
+                                                                },
+                                                                Statement::IfElse(ref x1) => {
+                                                                        let get_this = match x1.cond { 
+                                                                                Expr::MethodCall(ref x2) => {
+                                                                                        match &x2.prefix_opt  {
+                                                                                                Some(box x) => {
+                                                                                                        // let x = x.to_owned();
+                                                                                                        match x {
+                                                                                                                Expr::Name(ref x3) => {
+                                                                                                                        format!("{}.{}", x3.name.fragment, x2.name.fragment)
+                                                                                                                },
+                                                                                                                _ => "".to_string()
+                                                                                                        }
+                                                                                                },
+                                                                                                _ => {
+                                                                                                        "".to_string()
+                                                                                                },
+                                                                                        }
+                                                                                },
+                                                                                _ => "".to_string()
+                                                                        };
+                                                                        println!("\n\try_this\n\n\n\n\n{:?}", get_this);
+                                                                        println!("\n\ncond\n\n\n\n\n{:?}", x1.cond);
+                                                                        println!("\n\nblock\n\n\n\n\n{:?}", x1.block);
+                                                                }
+                                                                _ => {},
+                                                        }
+                                                }
+                                        };
+                                }
+                                // true
                         },
+                        // _ => false,
                         _ => {},
-                } 
+                }
         }
+
+        // let mut iter = cu.body.items.iter();
+        // if let Some(result) = iter.find(|&x| match x {
+        //         ClassBodyItem::Method(ref y) => {
+        //                 println!("method {:?} in class {:?}", y.name.fragment, cu.name.fragment);
+        //                 if y.name.fragment == "setDependencies" {
+        //                         if let Some(x) = &y.block_opt {
+        //                                 for stmt in &x.stmts{
+        //                                         match stmt {
+        //                                                 Statement::Expr(ref x1) => {
+        //                                                         match x1 {
+        //                                                                 Expr::ConstructorReference(ref x2) => {
+        //                                                                         println!("constructor reference {:?}", x2);
+        //                                                                 }
+        //                                                                 _ => {},
+        //                                                         }
+        //                                                 },
+        //                                                 _ => {},
+        //                                         }
+        //                                 }
+        //                         };
+        //                 }
+        //                 true
+        //         },
+        //         _ => false,
+        // }){
+
+        // };
+        // if let Some(result) = iter.find(|&x| match x {
+        //         ClassBodyItem::Class(ref x) => true,
+        //         _ => return false,
+        // }){
+        //         match result {
+        //                 ClassBodyItem::Class(ref x)  => {
+        //                         recu_class(x);
+        //                         // find constructor
+        //                         for class_body in &x.body.items {
+        //                                 match class_body {
+        //                                         ClassBodyItem::StaticInitializer(ref y) => {
+        //                                                 // println!("x {:?} y {:?}", x.name.fragment, y.name.fragment);
+        //                                                 // if y.name.fragment == x.name.fragment {
+        //                                                 //         println!("ketemu konstruktornya  {:?}", y.name.fragment);
+        //                                                 // } 
+        //                                         },   
+        //                                         ClassBodyItem::Constructor(ref y) => {
+        //                                                 println!("x {:?} y {:?}", x.name.fragment, y.name.fragment);
+        //                                                 if y.name.fragment == x.name.fragment {
+        //                                                         println!("ketemu konstruktornya  {:?}", y.name.fragment);
+        //                                                 } 
+        //                                         },
+        //                                         ClassBodyItem::Method(ref y) => {
+        //                                                 println!("x {:?} y {:?}", x.name.fragment, y.name.fragment);
+        //                                                 if y.name.fragment == x.name.fragment {
+        //                                                         println!("ketemu konstruktornya  {:?}", y.name.fragment);
+        //                                                 } 
+        //                                         },
+        //                                         _ => {},
+        //                                 }
+        //                         }
+        //                 },
+        //                 _ => {},
+        //         } 
+        // }
 }
